@@ -59,7 +59,10 @@ module Logic =
         expressionResult //TODO: write a function that checks if 2 requests overlap
 
     let overlapsWithAnyRequest (otherRequests: TimeOffRequest seq) request =
-        false //TODO: write this function using overlapsWith
+        let mutable result = false
+        for s in otherRequests do 
+           result <- overlapsWith request s
+        result //TODO: write this function using overlapsWith
 
     let createRequest activeUserRequests  request =
         if request |> overlapsWithAnyRequest activeUserRequests then

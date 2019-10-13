@@ -72,9 +72,8 @@ let overlapTests =
         Start = { Date = DateTime(2019, 10, 3); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 3); HalfDay = PM }
       }
-      let mutable resultseq = seq<TimeOffRequest>{request1, request2}
-
-      Expect.isFalse (Logic.overlapsWithAnyRequest resultseq) "The requests don't overlap"
+      let resultseq = [request2;request1]
+      Expect.isFalse (Logic.overlapsWithAnyRequest resultseq request3) "The requests don't overlap"
     }
   ]
 
