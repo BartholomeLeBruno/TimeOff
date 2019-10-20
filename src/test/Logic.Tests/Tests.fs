@@ -124,7 +124,7 @@ let cancelTests =
       Given [ RequestCreated request ]
       |> ConnectedAs Manager
       |> When (CancelRequest ("jdoe", request.RequestId))
-      |> Then (Ok [Canceled request]) "The request should have been canceled"
+      |> Then (Ok [RequestCanceled request]) "The request should have been canceled"
     }
   ]
  
