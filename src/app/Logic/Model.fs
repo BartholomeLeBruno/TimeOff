@@ -6,21 +6,25 @@ open System
 type Command =
     | RequestTimeOff of TimeOffRequest
     | ValidateRequest of UserId * Guid
+    | CancelRequest of UserId * Guid
     with
     member this.UserId =
         match this with
         | RequestTimeOff request -> request.UserId
         | ValidateRequest (userId, _) -> userId
+        | CancelRequest (userId, _) -> userId
 
 // And our events
 type RequestEvent =
     | RequestCreated of TimeOffRequest
     | RequestValidated of TimeOffRequest
+    | RequestCanceled of TimeOffRequest
     with
     member this.Request =
         match this with
         | RequestCreated request -> request
         | RequestValidated request -> request
+        | RequestCanceled request -> request
 
 // We then define the state of the system,
 // and our 2 main functions `decide` and `evolve`
@@ -86,7 +90,7 @@ module Logic =
     let cancelRequest requestState =
       match requestState with
         | PendingValidation request ->
-            Ok [Canceled request]
+            Ok [RequestCanceled request]
         | _ ->
             Error "Request cannot be canceled"
 
