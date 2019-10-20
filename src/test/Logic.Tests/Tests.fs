@@ -110,3 +110,21 @@ let validationTests =
       |> Then (Ok [RequestValidated request]) "The request should have been validated"
     }
   ]
+
+[<Tests>]
+let cancelTests =
+  testList "Cancel tests" [
+    test "A request is canceled" {
+      let request = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2019, 12, 27); HalfDay = AM }
+        End = { Date = DateTime(2019, 12, 27); HalfDay = PM } }
+
+      Given [ RequestCreated request ]
+      |> ConnectedAs Manager
+      |> When (CancelRequest ("jdoe", request.RequestId))
+      |> Then (Ok [Canceled request]) "The request should have been canceled"
+    }
+  ]
+ 

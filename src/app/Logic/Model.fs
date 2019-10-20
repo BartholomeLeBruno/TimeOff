@@ -29,17 +29,20 @@ module Logic =
     type RequestState =
         | NotCreated
         | PendingValidation of TimeOffRequest
+        | Canceled of TimeOffRequest
         | Validated of TimeOffRequest with
         member this.Request =
             match this with
             | NotCreated -> invalidOp "Not created"
             | PendingValidation request
             | Validated request -> request
+            | Canceled request -> request
         member this.IsActive =
             match this with
             | NotCreated -> false
             | PendingValidation _
             | Validated _ -> true
+            | Canceled _ -> false
 
     type UserRequestsState = Map<Guid, RequestState>
 
@@ -79,6 +82,13 @@ module Logic =
             Ok [RequestValidated request]
         | _ ->
             Error "Request cannot be validated"
+
+    let cancelRequest requestState =
+      match requestState with
+        | PendingValidation request ->
+            Ok [Canceled request]
+        | _ ->
+            Error "Request cannot be canceled"
 
     let decide (userRequests: UserRequestsState) (user: User) (command: Command) =
         let relatedUserId = command.UserId
