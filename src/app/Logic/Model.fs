@@ -7,24 +7,30 @@ type Command =
     | RequestTimeOff of TimeOffRequest
     | ValidateRequest of UserId * Guid
     | CancelRequest of UserId * Guid
+    | ValidatePendingCancelRequest of UserId * Guid
+    | PendingCancelRequest of UserId * Guid
     with
     member this.UserId =
         match this with
         | RequestTimeOff request -> request.UserId
         | ValidateRequest (userId, _) -> userId
         | CancelRequest (userId, _) -> userId
+        | ValidatePendingCancelRequest (userId, _) -> userId
+        | PendingCancelRequest (userId, _) -> userId
 
 // And our events
 type RequestEvent =
     | RequestCreated of TimeOffRequest
     | RequestValidated of TimeOffRequest
     | RequestCanceled of TimeOffRequest
+    | RequestCancelPending of TimeOffRequest
     with
     member this.Request =
         match this with
         | RequestCreated request -> request
         | RequestValidated request -> request
         | RequestCanceled request -> request
+        | RequestCancelPending request -> request
 
 // We then define the state of the system,
 // and our 2 main functions `decide` and `evolve`
@@ -32,19 +38,22 @@ module Logic =
 
     type RequestState =
         | NotCreated
-        | PendingValidation of TimeOffRequest
+        | PendingValidation of TimeOffRequest 
         | Canceled of TimeOffRequest
-        | Validated of TimeOffRequest with
+        | Validated of TimeOffRequest
+        | PendingCancelValidation of TimeOffRequest with
         member this.Request =
             match this with
             | NotCreated -> invalidOp "Not created"
             | PendingValidation request
+            | PendingCancelValidation request
             | Validated request -> request
             | Canceled request -> request
         member this.IsActive =
             match this with
             | NotCreated -> false
-            | PendingValidation _
+            | PendingValidation _ -> true
+            | PendingCancelValidation _ ->true
             | Validated _ -> true
             | Canceled _ -> false
 
@@ -55,6 +64,7 @@ module Logic =
         | RequestCreated request -> PendingValidation request
         | RequestValidated request -> Validated request
         | RequestCanceled request -> Canceled request
+        | RequestCancelPending request -> Canceled request
 
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =
         let requestState = defaultArg (Map.tryFind event.Request.RequestId userRequests) NotCreated
@@ -90,6 +100,19 @@ module Logic =
       match requestState with
         | PendingValidation request ->
             Ok [RequestCanceled request]
+        | _ ->
+            Error "Request cannot be canceled"
+
+    let validatePendingCancelRequest requestState =
+        match requestState with
+        | PendingCancelValidation request ->
+            Ok [RequestValidated request]
+        | _ ->
+            Error "Request cannot be validated"
+    let pendingCancelRequest requestState =
+      match requestState with
+        | PendingCancelValidation request ->
+            Ok [RequestCancelPending request]
         | _ ->
             Error "Request cannot be canceled"
 
@@ -136,4 +159,24 @@ module Logic =
                     if isCancel then                   
                         cancelRequest requestState
                     else
-                        Error "Unauthorized"   
+                        Error "Unauthorized"
+
+            | ValidatePendingCancelRequest (_, requestId) ->
+                if user <> Manager then
+                    Error "Unauthorized"
+                else
+                    let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
+                    validatePendingCancelRequest requestState
+
+            | PendingCancelRequest (_, requestId) ->
+                if user <> Manager then
+                    Error "Unauthorized"
+                else                            
+                    let activeUserRequests =
+                        userRequests
+                        |> Map.toSeq
+                        |> Seq.map (fun (_, state) -> state)
+                        |> Seq.where (fun state -> state.IsActive)
+                        |> Seq.map (fun state -> state.Request)  
+                    
+                    Error "Unauthorized"
