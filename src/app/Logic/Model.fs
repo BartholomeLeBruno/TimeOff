@@ -116,9 +116,10 @@ module Logic =
     let validatePendingCancelRequest requestState =
         match requestState with
         | PendingCancelValidation request ->
-            Ok [RequestValidated request]
+            Ok [RequestCancelPendingValidated request]
         | _ ->
             Error "Request cannot be validated"
+
     let cancelPendingCancelRequest requestState =
       match requestState with
         | PendingCancelValidation request ->
@@ -166,10 +167,12 @@ module Logic =
                         if request.RequestId = requestId then
                             if request.Start.Date <= DateTime.Today then
                                 isCancel <- true
+                            else
+                                isCancel <- false
                     if isCancel then                   
                         cancelRequest requestState
                     else
-                        Error "Unauthorized"
+                        validatePendingCancelRequest requestState
 
             | ValidatePendingCancelRequest (_, requestId) ->
                 if user <> Manager then
