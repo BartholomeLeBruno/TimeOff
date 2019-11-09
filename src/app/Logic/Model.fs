@@ -172,7 +172,7 @@ module Logic =
                     if isCancel then                   
                         cancelRequest requestState
                     else
-                        validatePendingCancelRequest requestState
+                        cancelPendingCancelRequest requestState
 
             | ValidatePendingCancelRequest (_, requestId) ->
                 if user <> Manager then
@@ -182,6 +182,10 @@ module Logic =
                     validatePendingCancelRequest requestState
 
             | CancelPendingCancelRequest (_, requestId) ->
+
+                let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
+                let mutable isCancel = false
+
                 if user <> Manager then
                     Error "Unauthorized"
                 else                            
@@ -192,4 +196,12 @@ module Logic =
                         |> Seq.where (fun state -> state.IsActive)
                         |> Seq.map (fun state -> state.Request)  
                     
-                    Error "Unauthorized"
+
+                    for request in activeUserRequests do
+                        if request.RequestId = requestId then
+                            isCancel <- true
+                    
+                    if isCancel then
+                        cancelPendingCancelRequest requestState
+                    else
+                        Error "Unauthorized"
