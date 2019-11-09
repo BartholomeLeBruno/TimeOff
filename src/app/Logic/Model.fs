@@ -23,16 +23,16 @@ type RequestEvent =
     | RequestCreated of TimeOffRequest
     | RequestValidated of TimeOffRequest
     | RequestCanceled of TimeOffRequest
-    | RequestCancelPending of TimeOffRequest
-    | RequestCancelValidated of TimeOffRequest
+    | RequestCancelPendingCanceled of TimeOffRequest
+    | RequestCancelPendingValidated of TimeOffRequest
     with
     member this.Request =
         match this with
         | RequestCreated request -> request
         | RequestValidated request -> request
         | RequestCanceled request -> request
-        | RequestCancelPending request -> request
-        | RequestCancelValidated request -> request
+        | RequestCancelPendingCanceled request -> request
+        | RequestCancelPendingValidated request -> request
 
 // We then define the state of the system,
 // and our 2 main functions `decide` and `evolve`
@@ -72,8 +72,8 @@ module Logic =
         | RequestCreated request -> PendingValidation request
         | RequestValidated request -> Validated request
         | RequestCanceled request -> Canceled request
-        | RequestCancelPending request -> Canceled request
-        | RequestCancelValidated request -> Canceled request
+        | RequestCancelPendingCanceled request -> Canceled request
+        | RequestCancelPendingValidated request -> Validated request
 
 
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =
@@ -122,7 +122,7 @@ module Logic =
     let cancelPendingCancelRequest requestState =
       match requestState with
         | PendingCancelValidation request ->
-            Ok [RequestCancelPending request]
+            Ok [RequestCancelPendingCanceled request]
         | _ ->
             Error "Request cannot be canceled"
 
