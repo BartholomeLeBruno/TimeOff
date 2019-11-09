@@ -112,6 +112,24 @@ let validationTests =
   ]
 
 [<Tests>]
+let validationTestsNotAsManager =
+  testList "Validation tests not as manager" [
+    test "A request is not validated" {
+      let request = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2019, 12, 27); HalfDay = AM }
+        End = { Date = DateTime(2019, 12, 27); HalfDay = PM } }
+
+      Given [ RequestCreated request ]
+      |> ConnectedAs (Employee "jdoe")
+      |> When (ValidateRequest ("jdoe", request.RequestId))
+      |> Then (Error "Unauthorized") "The request should'nt have been validated"
+    }
+  ]
+
+
+[<Tests>]
 let cancelTests =
   testList "Cancel tests" [
     test "A request is canceled" {

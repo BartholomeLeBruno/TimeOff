@@ -109,7 +109,6 @@ module Logic =
                     |> Seq.map (fun state -> state.Request)
 
                 createRequest activeUserRequests request
-
             | ValidateRequest (_, requestId) ->
                 if user <> Manager then
                     Error "Unauthorized"
