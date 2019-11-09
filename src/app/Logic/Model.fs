@@ -74,7 +74,7 @@ module Logic =
         if request |> overlapsWithAnyRequest activeUserRequests then
             Error "Overlapping request"
         // This DateTime.Today must go away!
-        elif request.Start.Date <= DateTime.Today then
+        elif request.Start.Date <= DateTime.Today.AddDays(1.) then
             Error "The request starts in the past"
         else
             Ok [RequestCreated request]
