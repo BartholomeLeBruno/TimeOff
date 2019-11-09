@@ -8,7 +8,7 @@ type Command =
     | ValidateRequest of UserId * Guid
     | CancelRequest of UserId * Guid
     | ValidatePendingCancelRequest of UserId * Guid
-    | PendingCancelRequest of UserId * Guid
+    | CancelPendingCancelRequest of UserId * Guid
     with
     member this.UserId =
         match this with
@@ -16,7 +16,7 @@ type Command =
         | ValidateRequest (userId, _) -> userId
         | CancelRequest (userId, _) -> userId
         | ValidatePendingCancelRequest (userId, _) -> userId
-        | PendingCancelRequest (userId, _) -> userId
+        | CancelPendingCancelRequest (userId, _) -> userId
 
 // And our events
 type RequestEvent =
@@ -109,7 +109,7 @@ module Logic =
             Ok [RequestValidated request]
         | _ ->
             Error "Request cannot be validated"
-    let pendingCancelRequest requestState =
+    let cancelPendingCancelRequest requestState =
       match requestState with
         | PendingCancelValidation request ->
             Ok [RequestCancelPending request]
@@ -168,7 +168,7 @@ module Logic =
                     let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
                     validatePendingCancelRequest requestState
 
-            | PendingCancelRequest (_, requestId) ->
+            | CancelPendingCancelRequest (_, requestId) ->
                 if user <> Manager then
                     Error "Unauthorized"
                 else                            
