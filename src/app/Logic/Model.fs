@@ -24,6 +24,7 @@ type RequestEvent =
     | RequestValidated of TimeOffRequest
     | RequestCanceled of TimeOffRequest
     | RequestCancelPending of TimeOffRequest
+    | RequestCancelValidated of TimeOffRequest
     with
     member this.Request =
         match this with
@@ -31,6 +32,7 @@ type RequestEvent =
         | RequestValidated request -> request
         | RequestCanceled request -> request
         | RequestCancelPending request -> request
+        | RequestCancelValidated request -> request
 
 // We then define the state of the system,
 // and our 2 main functions `decide` and `evolve`
@@ -41,19 +43,25 @@ module Logic =
         | PendingValidation of TimeOffRequest 
         | Canceled of TimeOffRequest
         | Validated of TimeOffRequest
-        | PendingCancelValidation of TimeOffRequest with
+        | PendingCancelValidation of TimeOffRequest 
+        | PendingCancelValidated of TimeOffRequest
+        | PendingCancelCanceled of TimeOffRequest with
         member this.Request =
             match this with
             | NotCreated -> invalidOp "Not created"
             | PendingValidation request
-            | PendingCancelValidation request
             | Validated request -> request
             | Canceled request -> request
+            | PendingCancelValidation request -> request
+            | PendingCancelValidated request -> request
+            | PendingCancelCanceled request -> request
         member this.IsActive =
             match this with
             | NotCreated -> false
             | PendingValidation _ -> true
-            | PendingCancelValidation _ ->true
+            | PendingCancelValidation _ -> true
+            | PendingCancelValidated _ -> false
+            | PendingCancelCanceled _ -> true
             | Validated _ -> true
             | Canceled _ -> false
 
@@ -65,6 +73,8 @@ module Logic =
         | RequestValidated request -> Validated request
         | RequestCanceled request -> Canceled request
         | RequestCancelPending request -> Canceled request
+        | RequestCancelValidated request -> Canceled request
+
 
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =
         let requestState = defaultArg (Map.tryFind event.Request.RequestId userRequests) NotCreated
