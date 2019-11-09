@@ -109,6 +109,7 @@ module Logic =
                     |> Seq.map (fun state -> state.Request)
 
                 createRequest activeUserRequests request
+                
             | ValidateRequest (_, requestId) ->
                 if user <> Manager then
                     Error "Unauthorized"
@@ -117,8 +118,22 @@ module Logic =
                     validateRequest requestState
                     
             | CancelRequest (_, requestId) ->
-                if user <> Manager then
-                    Error "Unauthorized"
-                else
-                    let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
+                let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
+                let mutable isCancel = false
+                if user = Manager then
                     cancelRequest requestState
+                else                              
+                    let activeUserRequests =
+                        userRequests
+                        |> Map.toSeq
+                        |> Seq.map (fun (_, state) -> state)
+                        |> Seq.where (fun state -> state.IsActive)
+                        |> Seq.map (fun state -> state.Request)     
+                    for request in activeUserRequests do
+                        if request.RequestId = requestId then
+                            if request.Start.Date <= DateTime.Today then
+                                isCancel <- true
+                    if isCancel then                   
+                        cancelRequest requestState
+                    else
+                        Error "Unauthorized"   
