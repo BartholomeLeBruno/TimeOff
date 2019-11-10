@@ -90,11 +90,13 @@ module Logic =
            result <- overlapsWith request s
         result //TODO: write this function using overlapsWith
 
+    let getCurrentTime () =
+        DateTime.Today
+
     let createRequest activeUserRequests  request =
         if request |> overlapsWithAnyRequest activeUserRequests then
             Error "Overlapping request"
-        // This DateTime.Today must go away!
-        elif request.Start.Date <= DateTime.Today.AddDays(1.) then
+        elif request.Start.Date <= getCurrentTime().AddDays(1.) then
             Error "The request starts in the past"
         else
             Ok [RequestCreated request]
@@ -165,7 +167,7 @@ module Logic =
                         |> Seq.map (fun state -> state.Request)     
                     for request in activeUserRequests do
                         if request.RequestId = requestId then
-                            if request.Start.Date <= DateTime.Today then
+                            if request.Start.Date <= getCurrentTime() then
                                 isCancel <- true
                             else
                                 isCancel <- false
