@@ -33,6 +33,24 @@ let overlapTests =
       Expect.isTrue (Logic.overlapsWith request request) "A request should overlap with istself"
     }
 
+    test "Requests on 2 distinct days start and end overlaps" {
+      let request1 = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2019, 10, 1); HalfDay = AM }
+        End = { Date = DateTime(2019, 10, 3); HalfDay = PM }
+      }
+
+      let request2 = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2019, 10, 2); HalfDay = AM }
+        End = { Date = DateTime(2019, 10, 4); HalfDay = PM }
+      }
+   
+      Expect.isTrue (Logic.overlapsWith request1 request2) "The requests overlap"
+    }
+
     test "Requests on 2 distinct days don't overlap" {
       let request1 = {
         UserId = "jdoe"
