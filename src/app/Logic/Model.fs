@@ -97,8 +97,9 @@ module Logic =
     let overlapsWithAnyRequest (otherRequests: TimeOffRequest seq) request =
         let mutable result = false
         for s in otherRequests do 
-           result <- overlapsWith request s
-        result //TODO: write this function using overlapsWith
+           if not result then
+                result <- overlapsWith request s       
+        result
 
     let getCurrentTime () =
         DateTime.Today

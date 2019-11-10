@@ -165,6 +165,31 @@ let overlapTests =
       let resultseq = [request2;request1]
       Expect.isFalse (Logic.overlapsWithAnyRequest resultseq request3) "The requests don't overlap"
     }
+
+    test "Seq of request overlap" {
+      let request1 = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2019, 10, 1); HalfDay = AM }
+        End = { Date = DateTime(2019, 10, 1); HalfDay = PM }
+      }
+
+      let request2 = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2019, 10, 2); HalfDay = AM }
+        End = { Date = DateTime(2019, 10, 4); HalfDay = PM }
+      }
+
+      let request3 = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2019, 10, 3); HalfDay = AM }
+        End = { Date = DateTime(2019, 10, 3); HalfDay = PM }
+      }
+      let resultseq = [request2;request1]
+      Expect.isTrue (Logic.overlapsWithAnyRequest resultseq request3) "The requests overlap"
+    }
   ]
 
 [<Tests>]
