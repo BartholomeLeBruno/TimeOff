@@ -85,6 +85,8 @@ module Logic =
         let mutable overlap = false
         if request1.Start.Date < request2.Start.Date && request1.End.Date < request2.End.Date && request1.End.Date > request2.Start.Date then 
             overlap <- true
+        if request2.Start.Date < request1.Start.Date && request2.End.Date < request1.End.Date && request2.End.Date > request1.Start.Date then 
+            overlap <- true
         if request1.End.Date <= request2.End.Date && request1.Start.Date >= request2.Start.Date  then
             overlap <- true
         if request1.Start.Date < request2.Start.Date && request1.End.Date > request2.End.Date  then
