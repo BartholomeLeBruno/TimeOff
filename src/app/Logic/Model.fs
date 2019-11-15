@@ -101,10 +101,7 @@ module Logic =
                 result <- overlapsWith request s       
         result
 
-    let getCurrentTime () =
-        DateTime.Today
-
-    let createRequest activeUserRequests  request =
+    let createRequest (getCurrentTime : unit->DateTime) activeUserRequests  request =
         if request |> overlapsWithAnyRequest activeUserRequests then
             Error "Overlapping request"
         elif request.Start.Date <= getCurrentTime().AddDays(1.) then
@@ -140,7 +137,7 @@ module Logic =
         | _ ->
             Error "Request cannot be canceled"
 
-    let decide (userRequests: UserRequestsState) (user: User) (command: Command) =
+    let decide (getCurrentTime : unit->DateTime) (userRequests: UserRequestsState) (user: User) (command: Command) =
         let relatedUserId = command.UserId
         match user with
         | Employee userId when userId <> relatedUserId ->
@@ -154,8 +151,8 @@ module Logic =
                     |> Seq.map (fun (_, state) -> state)
                     |> Seq.where (fun state -> state.IsActive)
                     |> Seq.map (fun state -> state.Request)
-
-                createRequest activeUserRequests request
+                   
+                createRequest (getCurrentTime : unit->DateTime) activeUserRequests request
                 
             | ValidateRequest (_, requestId) ->
                 if user <> Manager then
