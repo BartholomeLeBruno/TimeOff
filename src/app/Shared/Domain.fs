@@ -5,14 +5,9 @@ open System
 // First, we define our domain
 type UserId = string
 
-type UserType =
+type User =
     | Employee of UserId
     | Manager
-
-type User =  {
-    User: UserType
-    EntryDate: DateTime
-}
 
 type HalfDay = | AM | PM
 
@@ -31,6 +26,4 @@ type TimeOffRequest = {
 }
 
 [<CLIMutable>]
-type Vacations = {
-    Vacation: Map<UserId, List<TimeOffRequest>>
-}
+type Vacations = Map<UserId, List<TimeOffRequest>>

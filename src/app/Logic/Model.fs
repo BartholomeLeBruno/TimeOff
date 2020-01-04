@@ -67,6 +67,9 @@ module Logic =
 
     type UserRequestsState = Map<Guid, RequestState>
 
+
+    
+
     let evolveRequest state event =
         match event with
         | RequestCreated request -> PendingValidation request
@@ -74,6 +77,14 @@ module Logic =
         | RequestCanceled request -> Canceled request
         | RequestCancelPendingCanceled request -> Canceled request
         | RequestCancelPendingValidated request -> Validated request
+
+    let VacationCalculation (user: UserId) = 
+        let thisday = DateTime.Today
+        let availableVacation = 2.5 * (float) thisday.Month
+        let userRequests =
+            Vacations
+            |> Seq.map (fun (user, _) -> user)
+        availableVacation
 
 
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =
