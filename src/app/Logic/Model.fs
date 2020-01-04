@@ -78,14 +78,28 @@ module Logic =
         | RequestCancelPendingCanceled request -> Canceled request
         | RequestCancelPendingValidated request -> Validated request
 
-    let VacationCalculation (user: UserId) = 
+    let getBetweenDate (firstDate: DateTime) (secondDate: DateTime) =
+        let mutable theDate = 0
+        let mutable testableDate = firstDate
+        while firstDate.Date <> secondDate.Date do
+            testableDate <- firstDate.AddDays(1.)
+            if firstDate.DayOfWeek <> DayOfWeek.Sunday || firstDate.DayOfWeek <> DayOfWeek.Saturday then
+                theDate <- theDate + 1;
+        theDate 
+
+    let VacationCalculation (user: UserId) (allrequests: Vacations) = 
         let thisday = DateTime.Today
-        let availableVacation = 2.5 * (float) thisday.Month
+        let mutable availableVacation = 2.5 * (float) thisday.Month
         let userRequests =
-            Vacations
-            |> Seq.map (fun (user, _) -> user)
+            allrequests
+            |> Map.tryFind user
+            //|> List.map (fun this.Start.Date.Year -> thisday.Year)
+        for request in userRequests.Value do
+            if(request.Start.Date.Year = thisday.Year) then
+                availableVacation <- availableVacation - (float)(getBetweenDate request.Start.Date request.End.Date) 
         availableVacation
 
+           
 
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =
         let requestState = defaultArg (Map.tryFind event.Request.RequestId userRequests) NotCreated
