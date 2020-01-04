@@ -67,9 +67,6 @@ module Logic =
 
     type UserRequestsState = Map<Guid, RequestState>
 
-
-    
-
     let evolveRequest state event =
         match event with
         | RequestCreated request -> PendingValidation request
@@ -85,7 +82,14 @@ module Logic =
             testableDate <- firstDate.AddDays(1.)
             if firstDate.DayOfWeek <> DayOfWeek.Sunday || firstDate.DayOfWeek <> DayOfWeek.Saturday then
                 theDate <- theDate + 1;
-        theDate 
+        theDate
+
+    let getAvailableVacation (user: UserId) =
+        let thisday = DateTime.Today
+        let mutable availableVacation = 0.
+        if (thisday.Month > 1) then
+            availableVacation <-  2.5 - (float)(thisday.Month - 1)
+        availableVacation 
 
     let VacationCalculation (user: UserId) (allrequests: Vacations) = 
         let thisday = DateTime.Today
@@ -93,13 +97,10 @@ module Logic =
         let userRequests =
             allrequests
             |> Map.tryFind user
-            //|> List.map (fun this.Start.Date.Year -> thisday.Year)
         for request in userRequests.Value do
             if(request.Start.Date.Year = thisday.Year) then
                 availableVacation <- availableVacation - (float)(getBetweenDate request.Start.Date request.End.Date) 
         availableVacation
-
-           
 
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =
         let requestState = defaultArg (Map.tryFind event.Request.RequestId userRequests) NotCreated
