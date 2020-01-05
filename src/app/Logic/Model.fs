@@ -90,7 +90,7 @@ module Logic =
     let getAvailableVacation (user: UserId) =
         let mutable availableVacation = 0.
         if (getCurrentDay().Month > 1) then
-            availableVacation <-  2.5 - (float)(getCurrentDay().Month - 1)
+            availableVacation <-  2.5 * (float)(getCurrentDay().Month - 1)
         availableVacation
 
     // Calcul des congés pris l'année précèdente
