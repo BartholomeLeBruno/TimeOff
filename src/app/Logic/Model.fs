@@ -77,13 +77,15 @@ module Logic =
         | RequestCancelPendingCanceled request -> Canceled request
         | RequestCancelPendingValidated request -> Validated request
 
-    let getBetweenDate (firstDate: DateTime) (secondDate: DateTime) =
-        let mutable theDate = 0
-        let mutable testableDate = firstDate
-        while firstDate.Date <> secondDate.Date do
-            testableDate <- firstDate.AddDays(1.)
-            if firstDate.DayOfWeek <> DayOfWeek.Sunday || firstDate.DayOfWeek <> DayOfWeek.Saturday then
-                theDate <- theDate + 1;
+    let getBetweenDate (requestDate: TimeOffRequest) =
+        let mutable theDate = 0.
+        let mutable testableDate = requestDate.Start.Date
+        if requestDate.Start.HalfDay <> requestDate.End.HalfDay then 
+            theDate <- theDate - 0.5
+        while testableDate <> requestDate.End.Date do
+            testableDate <- testableDate.AddDays(1.)
+            if requestDate.Start.Date.DayOfWeek <> DayOfWeek.Sunday || requestDate.Start.Date.DayOfWeek <> DayOfWeek.Saturday then
+                theDate <- theDate + 1.;
         theDate
 
     // Calcul du cumul des congés
@@ -101,7 +103,7 @@ module Logic =
             |> Map.tryFind user
         for request in userRequests.Value do
             if((request.Start.Date.Year - 1) = (getCurrentDay().Year - 1)) then
-                availableVacation <- availableVacation - (float)(getBetweenDate request.Start.Date request.End.Date) 
+                availableVacation <- availableVacation - (float)(getBetweenDate request) 
         availableVacation            
 
     // Calcul congé effectif
@@ -112,7 +114,7 @@ module Logic =
             |> Map.tryFind user
         for request in userRequests.Value do
             if(request.Start.Date.Year = getCurrentDay().Year) then
-                availableVacation <- availableVacation - (float)(getBetweenDate request.Start.Date request.End.Date) 
+                availableVacation <- availableVacation - (float)(getBetweenDate request) 
         availableVacation
 
     // Calcul congés prévu
@@ -123,7 +125,7 @@ module Logic =
             |> Map.tryFind user
         for request in userRequests.Value do
             if request.Start.Date.Year = getCurrentDay().Year && request.Start.Date.Day > getCurrentDay().Day then
-                availableVacation <- availableVacation + (float)(getBetweenDate request.Start.Date request.End.Date)
+                availableVacation <- availableVacation + (float)(getBetweenDate request)
         availableVacation            
 
     // Calcul Solde disponible
