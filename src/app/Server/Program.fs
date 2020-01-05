@@ -66,6 +66,32 @@ module HttpHandlers =
                     return! (BAD_REQUEST message) next ctx
             }
 
+    let validatePendingCancelRequest (handleCommand: Command -> Result<RequestEvent list, string>) =
+        fun (next: HttpFunc) (ctx: HttpContext) ->
+            task {
+                let userAndRequestId = ctx.BindQueryString<UserAndRequestId>()
+                let command = ValidatePendingCancelRequest (userAndRequestId.UserId, userAndRequestId.RequestId)
+                let result = handleCommand command
+                match result with
+                | Ok [RequestCancelPendingCanceled timeOffRequest] -> return! json timeOffRequest next ctx
+                | Ok _ -> return! Successful.NO_CONTENT next ctx
+                | Error message ->
+                    return! (BAD_REQUEST message) next ctx
+            }
+
+    let cancelPendingCancelRequest (handleCommand: Command -> Result<RequestEvent list, string>) =
+        fun (next: HttpFunc) (ctx: HttpContext) ->
+            task {
+                let userAndRequestId = ctx.BindQueryString<UserAndRequestId>()
+                let command = CancelPendingCancelRequest (userAndRequestId.UserId, userAndRequestId.RequestId)
+                let result = handleCommand command
+                match result with
+                | Ok [RequestCancelPendingValidated timeOffRequest] -> return! json timeOffRequest next ctx
+                | Ok _ -> return! Successful.NO_CONTENT next ctx
+                | Error message ->
+                    return! (BAD_REQUEST message) next ctx
+            }
+
 // ---------------------------------
 // Web app
 // ---------------------------------
@@ -98,6 +124,8 @@ let webApp (eventStore: IStore<UserId, RequestEvent>) =
                             POST >=> route "/request" >=> HttpHandlers.requestTimeOff (handleCommand user)
                             POST >=> route "/validate-request" >=> HttpHandlers.validateRequest (handleCommand user)
                             POST >=> route "/cancel-request" >=> HttpHandlers.cancelRequest (handleCommand user)
+                            POST >=> route "/validate-pending-cancel-request" >=> HttpHandlers.validatePendingCancelRequest (handleCommand user)
+                            POST >=> route "/cancel-pending-cancel-request" >=> HttpHandlers.cancelPendingCancelRequest (handleCommand user)
                         ]
                     ))
             ])
