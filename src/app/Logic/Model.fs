@@ -87,7 +87,7 @@ module Logic =
         theDate
 
     // Calcul du cumul des congés
-    let getAvailableVacation (user: UserId) =
+    let getTheoricallAvailableVacation (user: UserId) =
         let mutable availableVacation = 0.
         if (getCurrentDay().Month > 1) then
             availableVacation <-  2.5 * (float)(getCurrentDay().Month - 1)
@@ -102,6 +102,7 @@ module Logic =
         for request in userRequests.Value do
             if((request.Start.Date.Year - 1) = (getCurrentDay().Year - 1)) then
                 availableVacation <- availableVacation - (float)(getBetweenDate request.Start.Date request.End.Date) 
+        availableVacation            
 
     // Calcul congé effectif
     let getEffectifVacation (user: UserId) (allrequests: Vacations) = 
@@ -122,7 +123,16 @@ module Logic =
             |> Map.tryFind user
         for request in userRequests.Value do
             if request.Start.Date.Year = getCurrentDay().Year && request.Start.Date.Day > getCurrentDay().Day then
-                availableVacation <- availableVacation + (float)(getBetweenDate request.Start.Date request.End.Date) 
+                availableVacation <- availableVacation + (float)(getBetweenDate request.Start.Date request.End.Date)
+        availableVacation            
+
+    // Calcul Solde disponible
+    let getAvailableVacation (user: UserId) (allrequests: Vacations) =
+        let theoricallAvailableVacation = getTheoricallAvailableVacation user
+        let pastYearVacation = getPastYearVacation user allrequests
+        let effectifVaction = getEffectifVacation user allrequests
+        let alreadyTakenVaction = getAlreadyTakenVacation user allrequests
+        (theoricallAvailableVacation + (float) pastYearVacation) - (effectifVaction + alreadyTakenVaction)        
 
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =
         let requestState = defaultArg (Map.tryFind event.Request.RequestId userRequests) NotCreated
