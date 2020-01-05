@@ -26,4 +26,4 @@ type TimeOffRequest = {
 }
 
 [<CLIMutable>]
-type Vacations = Map<UserId, List<TimeOffRequest>>
+type Vacations = Map<UserId, seq<TimeOffRequest>>

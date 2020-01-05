@@ -100,9 +100,9 @@ module Logic =
         let mutable availableVacation = 2.5 * 12.
         let userRequests =
             allrequests
-            |> Map.tryFind user
-        for request in userRequests.Value do
-            if((request.Start.Date.Year - 1) = (getCurrentDay().Year - 1)) then
+            |> Map.find user
+            |> Seq.where(fun request -> request.Start.Date.Year = getCurrentDay().Year)
+        for request in userRequests do
                 availableVacation <- availableVacation - (float)(getBetweenDate request) 
         availableVacation            
 
@@ -111,9 +111,9 @@ module Logic =
         let mutable availableVacation = 2.5 * (float)(getCurrentDay().Month)
         let userRequests =
             allrequests
-            |> Map.tryFind user
-        for request in userRequests.Value do
-            if(request.Start.Date.Year = getCurrentDay().Year) then
+            |> Map.find user
+            |> Seq.where(fun request -> request.Start.Date.Year = getCurrentDay().Year)
+        for request in userRequests do
                 availableVacation <- availableVacation - (float)(getBetweenDate request) 
         availableVacation
 
@@ -122,9 +122,9 @@ module Logic =
         let mutable availableVacation = 0.
         let userRequests =
             allrequests
-            |> Map.tryFind user
-        for request in userRequests.Value do
-            if request.Start.Date.Year = getCurrentDay().Year && request.Start.Date.Day > getCurrentDay().Day then
+            |> Map.find user
+            |> Seq.where(fun request -> request.Start.Date.Year = getCurrentDay().Year && request.Start.Date.Day > getCurrentDay().Day)
+        for request in userRequests do
                 availableVacation <- availableVacation + (float)(getBetweenDate request)
         availableVacation            
 
