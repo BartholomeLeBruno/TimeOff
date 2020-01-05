@@ -66,7 +66,7 @@ module Logic =
             | Canceled _ -> false
 
     type UserRequestsState = Map<Guid, RequestState>
-    let getCurrentDay () =
+    let getCurrentDay() : DateTime =
         DateTime.Today
 
     let evolveRequest state event =
@@ -79,42 +79,42 @@ module Logic =
 
     let getBetweenDate (requestDate: TimeOffRequest) =
         let mutable theDate = 0.
-        let mutable testableDate = requestDate.Start.Date
-        if requestDate.Start.HalfDay <> requestDate.End.HalfDay then 
+        let mutable testableDate = requestDate.Start.Date // 5
+        if requestDate.Start.HalfDay = requestDate.End.HalfDay then 
             theDate <- theDate - 0.5
-        while testableDate <> requestDate.End.Date do
-            testableDate <- testableDate.AddDays(1.)
+        while testableDate <=  requestDate.End.Date do
             if requestDate.Start.Date.DayOfWeek <> DayOfWeek.Sunday || requestDate.Start.Date.DayOfWeek <> DayOfWeek.Saturday then
                 theDate <- theDate + 1.;
+            testableDate <- testableDate.AddDays(1.)
         theDate
 
     // Calcul du cumul des congés
-    let getTheoricallAvailableVacation (user: UserId) =
+    let getTheoricallAvailableVacation (currentDate: DateTime) =
         let mutable availableVacation = 0.
-        if (getCurrentDay().Month > 1) then
-            availableVacation <-  2.5 * (float)(getCurrentDay().Month - 1)
+        if (currentDate.Month > 1) then
+            availableVacation <-  2.5 * (float)(currentDate.Month - 1)
         availableVacation
 
     // Calcul des congés pris l'année précèdente
-    let getPastYearVacation (user: UserId) (allrequests: Vacations) =
-        let mutable availableVacation = 2.5 * 12.
+    let getPastYearVacation (user: UserId) (allrequests: Vacations) (currentDate: DateTime) =
+        let mutable availableVacation = 2.5 * 11.
         let userRequests =
             allrequests
             |> Map.find user
-            |> Seq.where(fun request -> request.Start.Date.Year = getCurrentDay().Year)
+            |> Seq.where(fun request -> request.Start.Date.Year = (currentDate.Year - 1))
         for request in userRequests do
                 availableVacation <- availableVacation - (float)(getBetweenDate request) 
         availableVacation            
 
     // Calcul congé effectif
-    let getEffectifVacation (user: UserId) (allrequests: Vacations) = 
-        let mutable availableVacation = 2.5 * (float)(getCurrentDay().Month)
+    let getEffectifVacation (user: UserId) (allrequests: Vacations) (currentDate: DateTime) = 
+        let mutable availableVacation = 0.
         let userRequests =
             allrequests
             |> Map.find user
-            |> Seq.where(fun request -> request.Start.Date.Year = getCurrentDay().Year)
+            |> Seq.where(fun request -> request.Start.Date.Year = currentDate.Year)
         for request in userRequests do
-                availableVacation <- availableVacation - (float)(getBetweenDate request) 
+                availableVacation <- availableVacation + (float)(getBetweenDate request) 
         availableVacation
 
     // Calcul congés prévu
@@ -130,11 +130,11 @@ module Logic =
 
     // Calcul Solde disponible
     let getAvailableVacation (user: UserId) (allrequests: Vacations) =
-        let theoricallAvailableVacation = getTheoricallAvailableVacation user
-        let pastYearVacation = getPastYearVacation user allrequests
-        let effectifVaction = getEffectifVacation user allrequests
+        let theoricallAvailableVacation = getTheoricallAvailableVacation (getCurrentDay())
+        let pastYearVacation = getPastYearVacation user allrequests (getCurrentDay())
+        let effectifVaction = getEffectifVacation user allrequests (getCurrentDay())
         let alreadyTakenVaction = getAlreadyTakenVacation user allrequests
-        (theoricallAvailableVacation + (float) pastYearVacation) - (effectifVaction + alreadyTakenVaction)        
+        (theoricallAvailableVacation + (float) pastYearVacation) - (effectifVaction + alreadyTakenVaction)     
 
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =
         let requestState = defaultArg (Map.tryFind event.Request.RequestId userRequests) NotCreated

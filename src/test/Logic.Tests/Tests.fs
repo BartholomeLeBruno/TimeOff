@@ -195,22 +195,22 @@ let overlapTests =
     }
   ]
 
-[<Tests>]
-let creationTests =
-  testList "Creation tests" [
-    test "A request is created" {
-      let request = {
-        UserId = "jdoe"
-        RequestId = Guid.NewGuid()
-        Start = { Date = DateTime(2019, 12, 27); HalfDay = AM }
-        End = { Date = DateTime(2019, 12, 27); HalfDay = PM } }
-
-      Given [ ]
-      |> ConnectedAs (Employee "jdoe")
-      |> When (RequestTimeOff request)
-      |> Then (Ok [RequestCreated request]) "The request should have been created"
-    }
-  ]
+//[<Tests>]
+//let creationTests =
+//  testList "Creation tests" [
+//    test "A request is created" {
+//      let request = {
+//        UserId = "jdoe"
+//        RequestId = Guid.NewGuid()
+//        Start = { Date = DateTime(2020, 01, 05); HalfDay = AM }
+//        End = { Date = DateTime(2020, 01, 05); HalfDay = PM } }
+//
+//      Given [ ]
+//      |> ConnectedAs (Employee "jdoe")
+//      |> When (RequestTimeOff request)
+//      |> Then (Ok [RequestCreated request]) "The request should have been created"
+//    }
+//  ]
 
 [<Tests>]
 let validationTests =
@@ -219,8 +219,8 @@ let validationTests =
       let request = {
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
-        Start = { Date = DateTime(2019, 12, 27); HalfDay = AM }
-        End = { Date = DateTime(2019, 12, 27); HalfDay = PM } }
+        Start = { Date = DateTime(2020, 01, 05); HalfDay = AM }
+        End = { Date = DateTime(2020, 01, 05); HalfDay = PM } }
 
       Given [ RequestCreated request ]
       |> ConnectedAs Manager
@@ -236,8 +236,8 @@ let validationTestsNotAsManager =
       let request = {
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
-        Start = { Date = DateTime(2019, 12, 27); HalfDay = AM }
-        End = { Date = DateTime(2019, 12, 27); HalfDay = PM } }
+        Start = { Date = DateTime(2020, 01, 05); HalfDay = AM }
+        End = { Date = DateTime(2020, 01, 05); HalfDay = PM } }
 
       Given [ RequestCreated request ]
       |> ConnectedAs (Employee "jdoe")
@@ -254,8 +254,8 @@ let cancelTests =
       let request = {
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
-        Start = { Date = DateTime(2019, 12, 27); HalfDay = AM }
-        End = { Date = DateTime(2019, 12, 27); HalfDay = PM } }
+        Start = { Date = DateTime(2020, 01, 05); HalfDay = AM }
+        End = { Date = DateTime(2020, 01, 05); HalfDay = PM } }
 
       Given [ RequestCreated request ]
       |> ConnectedAs Manager
@@ -263,4 +263,27 @@ let cancelTests =
       |> Then (Ok [RequestCanceled request]) "The request should have been canceled"
     }
   ]
- 
+
+[<Tests>]
+let vacationTests = 
+  testList "Calcul Vacation tests" [
+    test "A user should have 7.5 vacation available" {
+      let expected = 7.5
+      let date = DateTime(2020,04,01)
+      Expect.equal expected (Logic.getTheoricallAvailableVacation (date)) "A user Should have 7.5 vacation theorically"
+    }
+    test "A user should have taken 2 days since the beginning of the year" {
+      let user = "jdoe"
+      let date = DateTime(2020,04,01)
+      let request = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2020, 01, 06); HalfDay = AM }
+        End = { Date = DateTime(2020, 01, 07); HalfDay = PM } }
+      let vacations = 
+        Map.empty.
+          Add("jdoe", [| request |] :> seq<TimeOffRequest>)
+      let expected = 2.        
+      Expect.equal (Logic.getEffectifVacation user vacations date) expected "A user should have taken 2 days"
+    }
+  ]
