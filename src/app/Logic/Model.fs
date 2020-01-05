@@ -66,6 +66,8 @@ module Logic =
             | Canceled _ -> false
 
     type UserRequestsState = Map<Guid, RequestState>
+    let getCurrentDay () =
+        DateTime.Today
 
     let evolveRequest state event =
         match event with
@@ -84,23 +86,43 @@ module Logic =
                 theDate <- theDate + 1;
         theDate
 
+    // Calcul du cumul des congés
     let getAvailableVacation (user: UserId) =
-        let thisday = DateTime.Today
         let mutable availableVacation = 0.
-        if (thisday.Month > 1) then
-            availableVacation <-  2.5 - (float)(thisday.Month - 1)
-        availableVacation 
+        if (getCurrentDay().Month > 1) then
+            availableVacation <-  2.5 - (float)(getCurrentDay().Month - 1)
+        availableVacation
 
-    let VacationCalculation (user: UserId) (allrequests: Vacations) = 
-        let thisday = DateTime.Today
-        let mutable availableVacation = 2.5 * (float) thisday.Month
+    // Calcul des congés pris l'année précèdente
+    let getPastYearVacation (user: UserId) (allrequests: Vacations) =
+        let mutable availableVacation = 2.5 * 12.
         let userRequests =
             allrequests
             |> Map.tryFind user
         for request in userRequests.Value do
-            if(request.Start.Date.Year = thisday.Year) then
+            if((request.Start.Date.Year - 1) = (getCurrentDay().Year - 1)) then
+                availableVacation <- availableVacation - (float)(getBetweenDate request.Start.Date request.End.Date) 
+
+    // Calcul congé effectif
+    let getEffectifVacation (user: UserId) (allrequests: Vacations) = 
+        let mutable availableVacation = 2.5 * (float)(getCurrentDay().Month)
+        let userRequests =
+            allrequests
+            |> Map.tryFind user
+        for request in userRequests.Value do
+            if(request.Start.Date.Year = getCurrentDay().Year) then
                 availableVacation <- availableVacation - (float)(getBetweenDate request.Start.Date request.End.Date) 
         availableVacation
+
+    // Calcul congés prévu
+    let getAlreadyTakenVacation (user: UserId) (allrequests: Vacations) =
+        let mutable availableVacation = 0.
+        let userRequests =
+            allrequests
+            |> Map.tryFind user
+        for request in userRequests.Value do
+            if request.Start.Date.Year = getCurrentDay().Year && request.Start.Date.Day > getCurrentDay().Day then
+                availableVacation <- availableVacation + (float)(getBetweenDate request.Start.Date request.End.Date) 
 
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =
         let requestState = defaultArg (Map.tryFind event.Request.RequestId userRequests) NotCreated
