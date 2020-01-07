@@ -280,10 +280,29 @@ let vacationTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2020, 01, 06); HalfDay = AM }
         End = { Date = DateTime(2020, 01, 07); HalfDay = PM } }
-      let vacations = 
-        Map.empty.
-          Add("jdoe", [| request |] :> seq<TimeOffRequest>)
+      let vacations = seq { yield request }
       let expected = 2.        
       Expect.equal (Logic.getEffectifVacation user vacations date) expected "A user should have taken 2 days"
     }
+    test "A user should have taken 2 days for next days" {
+      let user = "jdoe"
+      let date = DateTime(2020,04,01)
+      let request = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2020, 08, 06); HalfDay = AM }
+        End = { Date = DateTime(2020, 08, 07); HalfDay = PM } }
+      let request2 = {
+        UserId = "jeanmi"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2020, 08, 11); HalfDay = AM }
+        End = { Date = DateTime(2020, 08, 10); HalfDay = PM } }
+      let vacations = seq { 
+        yield request 
+        yield request2 
+      }
+      let expected = 2.        
+      Expect.equal (Logic.getAlreadyTakenVacation user vacations date) expected "A user should have taken 2 days"
+    }
+
   ]

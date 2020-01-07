@@ -100,7 +100,7 @@ module Logic =
         let mutable availableVacation = 2.5 * 11.
         let userRequests =
             allrequests
-            |> Map.find user
+            |> Seq.where(fun request -> request.UserId = user)
             |> Seq.where(fun request -> request.Start.Date.Year = (currentDate.Year - 1))
         for request in userRequests do
                 availableVacation <- availableVacation - (float)(getBetweenDate request) 
@@ -111,19 +111,19 @@ module Logic =
         let mutable availableVacation = 0.
         let userRequests =
             allrequests
-            |> Map.find user
+            |> Seq.where(fun request -> request.UserId = user)
             |> Seq.where(fun request -> request.Start.Date.Year = currentDate.Year)
         for request in userRequests do
                 availableVacation <- availableVacation + (float)(getBetweenDate request) 
         availableVacation
 
     // Calcul congés prévu
-    let getAlreadyTakenVacation (user: UserId) (allrequests: Vacations) =
+    let getAlreadyTakenVacation (user: UserId) (allrequests: Vacations) (currentDate: DateTime) =
         let mutable availableVacation = 0.
         let userRequests =
             allrequests
-            |> Map.find user
-            |> Seq.where(fun request -> request.Start.Date.Year = getCurrentDay().Year && request.Start.Date.Day > getCurrentDay().Day)
+            |> Seq.where(fun request -> request.UserId = user)
+            |> Seq.where(fun request -> request.Start.Date.Year = currentDate.Year && request.Start.Date.Day > currentDate.Day)
         for request in userRequests do
                 availableVacation <- availableVacation + (float)(getBetweenDate request)
         availableVacation            
@@ -133,7 +133,7 @@ module Logic =
         let theoricallAvailableVacation = getTheoricallAvailableVacation (getCurrentDay())
         let pastYearVacation = getPastYearVacation user allrequests (getCurrentDay())
         let effectifVaction = getEffectifVacation user allrequests (getCurrentDay())
-        let alreadyTakenVaction = getAlreadyTakenVacation user allrequests
+        let alreadyTakenVaction = getAlreadyTakenVacation user allrequests (getCurrentDay())
         (theoricallAvailableVacation + (float) pastYearVacation) - (effectifVaction + alreadyTakenVaction)     
 
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =
