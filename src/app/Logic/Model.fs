@@ -129,11 +129,11 @@ module Logic =
         availableVacation            
 
     // Calcul Solde disponible
-    let getAvailableVacation (user: UserId) (allrequests: Vacations) =
-        let theoricallAvailableVacation = getTheoricallAvailableVacation (getCurrentDay())
-        let pastYearVacation = getPastYearVacation user allrequests (getCurrentDay())
-        let effectifVaction = getEffectifVacation user allrequests (getCurrentDay())
-        let alreadyTakenVaction = getAlreadyTakenVacation user allrequests (getCurrentDay())
+    let getAvailableVacation (user: UserId) (allrequests: Vacations) (currentDate: DateTime) =
+        let theoricallAvailableVacation = getTheoricallAvailableVacation currentDate
+        let pastYearVacation = getPastYearVacation user allrequests currentDate
+        let effectifVaction = getEffectifVacation user allrequests currentDate
+        let alreadyTakenVaction = getAlreadyTakenVacation user allrequests currentDate
         (theoricallAvailableVacation + (float) pastYearVacation) - (effectifVaction + alreadyTakenVaction)     
 
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =

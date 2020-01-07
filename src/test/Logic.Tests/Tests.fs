@@ -330,5 +330,24 @@ let vacationTests =
       let expected = 5.        
       Expect.equal (Logic.getAlreadyTakenVacation user vacations date) expected "A user should have taken 5 days"
     }
+    test "A user should have taken 5 days past year, so it remains 22.5 days" {
+      let user = "jdoe"
+      let date = DateTime(2020,04,01)
+      let request = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2019, 01, 06); HalfDay = AM }
+        End = { Date = DateTime(2019, 01, 08); HalfDay = PM } }
+      let request2 = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2019, 08, 10); HalfDay = AM }
+        End = { Date = DateTime(2019, 08, 11); HalfDay = PM } }
+      let vacations = seq { 
+        request 
+        request2 }
+      let expected = 22.5        
+      Expect.equal (Logic.getPastYearVacation user vacations date) expected "A user should remain 22.5 days from past year"
+    }
 
   ]
