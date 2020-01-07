@@ -280,29 +280,55 @@ let vacationTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2020, 01, 06); HalfDay = AM }
         End = { Date = DateTime(2020, 01, 07); HalfDay = PM } }
-      let vacations = seq { yield request }
+      let vacations = seq { request }
       let expected = 2.        
       Expect.equal (Logic.getEffectifVacation user vacations date) expected "A user should have taken 2 days"
     }
-    test "A user should have taken 2 days for next days" {
+    test "A user should have taken 5 days for next days" {
       let user = "jdoe"
       let date = DateTime(2020,04,01)
       let request = {
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2020, 08, 06); HalfDay = AM }
-        End = { Date = DateTime(2020, 08, 07); HalfDay = PM } }
+        End = { Date = DateTime(2020, 08, 08); HalfDay = PM } }
       let request2 = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2020, 08, 10); HalfDay = AM }
+        End = { Date = DateTime(2020, 08, 11); HalfDay = PM } }
+      let vacations = seq { 
+         request 
+         request2 
+      }
+      let expected = 5.        
+      Expect.equal (Logic.getAlreadyTakenVacation user vacations date) expected "A user should have taken 5 days"
+    }
+    test "A user should have taken 5 days for next days with multiple user" {
+      let user = "jdoe"
+      let date = DateTime(2020,04,01)
+      let request = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2020, 08, 06); HalfDay = AM }
+        End = { Date = DateTime(2020, 08, 08); HalfDay = PM } }
+      let request2 = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2020, 08, 10); HalfDay = AM }
+        End = { Date = DateTime(2020, 08, 11); HalfDay = PM } }
+      let request3 = {
         UserId = "jeanmi"
         RequestId = Guid.NewGuid()
-        Start = { Date = DateTime(2020, 08, 11); HalfDay = AM }
-        End = { Date = DateTime(2020, 08, 10); HalfDay = PM } }
+        Start = { Date = DateTime(2020, 08, 17); HalfDay = AM }
+        End = { Date = DateTime(2020, 08, 18); HalfDay = PM } }
       let vacations = seq { 
-        yield request 
-        yield request2 
+         request 
+         request2
+         request3
       }
-      let expected = 2.        
-      Expect.equal (Logic.getAlreadyTakenVacation user vacations date) expected "A user should have taken 2 days"
+      let expected = 5.        
+      Expect.equal (Logic.getAlreadyTakenVacation user vacations date) expected "A user should have taken 5 days"
     }
 
   ]

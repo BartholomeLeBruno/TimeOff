@@ -82,10 +82,10 @@ module Logic =
         let mutable testableDate = requestDate.Start.Date // 5
         if requestDate.Start.HalfDay = requestDate.End.HalfDay then 
             theDate <- theDate - 0.5
-        while testableDate <=  requestDate.End.Date do
+        while testableDate <= requestDate.End.Date do
+            testableDate <- testableDate.AddDays(1.)
             if requestDate.Start.Date.DayOfWeek <> DayOfWeek.Sunday || requestDate.Start.Date.DayOfWeek <> DayOfWeek.Saturday then
                 theDate <- theDate + 1.;
-            testableDate <- testableDate.AddDays(1.)
         theDate
 
     // Calcul du cumul des congés
