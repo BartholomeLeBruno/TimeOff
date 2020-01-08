@@ -79,7 +79,7 @@ module Logic =
 
     let getBetweenDate (requestDate: TimeOffRequest) =
         let mutable theDate = 0.
-        let mutable testableDate = requestDate.Start.Date // 5
+        let mutable testableDate = requestDate.Start.Date
         if requestDate.Start.HalfDay = requestDate.End.HalfDay then 
             theDate <- theDate - 0.5
         while testableDate <= requestDate.End.Date do
