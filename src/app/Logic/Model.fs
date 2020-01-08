@@ -66,8 +66,6 @@ module Logic =
             | Canceled _ -> false
 
     type UserRequestsState = Map<Guid, RequestState>
-    let getCurrentDay() : DateTime =
-        DateTime.Today
 
     let evolveRequest state event =
         match event with
