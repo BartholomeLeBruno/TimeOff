@@ -31,6 +31,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 1); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
 
       Expect.isTrue (Logic.overlapsWith request request) "A request should overlap with istself"
@@ -42,6 +43,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 3); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
 
       let request2 = {
@@ -49,6 +51,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 2); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 4); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
    
       Expect.isTrue (Logic.overlapsWith request1 request2) "The requests overlap"
@@ -60,6 +63,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 2); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 4); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
 
       let request2 = {
@@ -67,6 +71,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 3); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
    
       Expect.isTrue (Logic.overlapsWith request1 request2) "The requests overlap"
@@ -78,6 +83,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 2); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
 
       let request2 = {
@@ -85,6 +91,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 2); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
    
       Expect.isTrue (Logic.overlapsWith request1 request2) "The requests overlap"
@@ -96,6 +103,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 4); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
 
       let request2 = {
@@ -103,6 +111,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 2); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 3); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
    
       Expect.isTrue (Logic.overlapsWith request1 request2) "The requests overlap"
@@ -114,6 +123,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 2); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 3); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
 
       let request2 = {
@@ -121,6 +131,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 4); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
    
       Expect.isTrue (Logic.overlapsWith request1 request2) "The requests overlap"
@@ -132,6 +143,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 1); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
 
       let request2 = {
@@ -139,6 +151,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 2); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 2); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
    
       Expect.isFalse (Logic.overlapsWith request1 request2) "The requests don't overlap"
@@ -150,6 +163,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 1); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
 
       let request2 = {
@@ -157,6 +171,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 2); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 2); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
 
       let request3 = {
@@ -164,6 +179,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 3); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 3); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
       let resultseq = [request2;request1]
       Expect.isFalse (Logic.overlapsWithAnyRequest resultseq request3) "The requests don't overlap"
@@ -175,6 +191,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 1); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
 
       let request2 = {
@@ -182,6 +199,7 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 2); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 4); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
 
       let request3 = {
@@ -189,28 +207,30 @@ let overlapTests =
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 10, 3); HalfDay = AM }
         End = { Date = DateTime(2019, 10, 3); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
       }
       let resultseq = [request2;request1]
       Expect.isTrue (Logic.overlapsWithAnyRequest resultseq request3) "The requests overlap"
     }
   ]
 
-//[<Tests>]
-//let creationTests =
-//  testList "Creation tests" [
-//    test "A request is created" {
-//      let request = {
-//        UserId = "jdoe"
-//        RequestId = Guid.NewGuid()
-//        Start = { Date = DateTime(2020, 01, 05); HalfDay = AM }
-//        End = { Date = DateTime(2020, 01, 05); HalfDay = PM } }
-//
-//      Given [ ]
-//      |> ConnectedAs (Employee "jdoe")
-//      |> When (RequestTimeOff request)
-//      |> Then (Ok [RequestCreated request]) "The request should have been created"
-//    }
-//  ]
+[<Tests>]
+let creationTests =
+  testList "Creation tests" [
+    test "A request is created" {
+      let request = {
+        UserId = "jdoe"
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2020, 02, 09); HalfDay = AM }
+        End = { Date = DateTime(2020, 02, 10); HalfDay = PM }
+        TakenDate = getCurrentDay()
+      }
+      Given [ ]
+      |> ConnectedAs (Employee "jdoe")
+      |> When (RequestTimeOff request)
+      |> Then (Ok [RequestCreated request]) "The request should have been created"
+    }
+  ]
 
 [<Tests>]
 let validationTests =
@@ -220,7 +240,9 @@ let validationTests =
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2020, 01, 05); HalfDay = AM }
-        End = { Date = DateTime(2020, 01, 05); HalfDay = PM } }
+        End = { Date = DateTime(2020, 01, 05); HalfDay = PM } 
+        TakenDate = DateTime(2019, 01, 1)
+      }
 
       Given [ RequestCreated request ]
       |> ConnectedAs Manager
@@ -237,7 +259,9 @@ let validationTestsNotAsManager =
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2020, 01, 05); HalfDay = AM }
-        End = { Date = DateTime(2020, 01, 05); HalfDay = PM } }
+        End = { Date = DateTime(2020, 01, 05); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1)
+      }
 
       Given [ RequestCreated request ]
       |> ConnectedAs (Employee "jdoe")
@@ -255,7 +279,8 @@ let cancelTests =
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2020, 01, 05); HalfDay = AM }
-        End = { Date = DateTime(2020, 01, 05); HalfDay = PM } }
+        End = { Date = DateTime(2020, 01, 05); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1) }
 
       Given [ RequestCreated request ]
       |> ConnectedAs Manager
@@ -279,7 +304,8 @@ let vacationTests =
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2020, 01, 06); HalfDay = AM }
-        End = { Date = DateTime(2020, 01, 07); HalfDay = PM } }
+        End = { Date = DateTime(2020, 01, 07); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1) }
       let vacations = seq { request }
       let expected = 2.        
       Expect.equal (Logic.getEffectifVacation user vacations date) expected "A user should have taken 2 days"
@@ -291,12 +317,14 @@ let vacationTests =
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2020, 08, 06); HalfDay = AM }
-        End = { Date = DateTime(2020, 08, 08); HalfDay = PM } }
+        End = { Date = DateTime(2020, 08, 08); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1) }
       let request2 = {
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2020, 08, 10); HalfDay = AM }
-        End = { Date = DateTime(2020, 08, 11); HalfDay = PM } }
+        End = { Date = DateTime(2020, 08, 11); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1) }
       let vacations = seq { 
          request 
          request2 
@@ -311,17 +339,20 @@ let vacationTests =
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2020, 08, 06); HalfDay = AM }
-        End = { Date = DateTime(2020, 08, 08); HalfDay = PM } }
+        End = { Date = DateTime(2020, 08, 08); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1) }
       let request2 = {
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2020, 08, 10); HalfDay = AM }
-        End = { Date = DateTime(2020, 08, 11); HalfDay = PM } }
+        End = { Date = DateTime(2020, 08, 11); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1) }
       let request3 = {
         UserId = "jeanmi"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2020, 08, 17); HalfDay = AM }
-        End = { Date = DateTime(2020, 08, 18); HalfDay = PM } }
+        End = { Date = DateTime(2020, 08, 18); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1) }
       let vacations = seq { 
          request 
          request2
@@ -337,12 +368,14 @@ let vacationTests =
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 01, 06); HalfDay = AM }
-        End = { Date = DateTime(2019, 01, 08); HalfDay = PM } }
+        End = { Date = DateTime(2019, 01, 08); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1) }
       let request2 = {
         UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2019, 08, 10); HalfDay = AM }
-        End = { Date = DateTime(2019, 08, 11); HalfDay = PM } }
+        End = { Date = DateTime(2019, 08, 11); HalfDay = PM }
+        TakenDate = DateTime(2019, 01, 1) }
       let vacations = seq { 
         request 
         request2 }

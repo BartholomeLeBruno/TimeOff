@@ -96,7 +96,7 @@ module Logic =
         availableVacation
 
     // Calcul des congés pris l'année précèdente
-    let getPastYearVacation (user: UserId) (allrequests: Vacations) (currentDate: DateTime) =
+    let getPastYearVacation (user: UserId) (allrequests: seq<TimeOffRequest>) (currentDate: DateTime) =
         let mutable availableVacation = 2.5 * 11.
         let userRequests =
             allrequests
@@ -107,7 +107,7 @@ module Logic =
         availableVacation            
 
     // Calcul congé effectif
-    let getEffectifVacation (user: UserId) (allrequests: Vacations) (currentDate: DateTime) = 
+    let getEffectifVacation (user: UserId) (allrequests: seq<TimeOffRequest>) (currentDate: DateTime) = 
         let mutable availableVacation = 0.
         let userRequests =
             allrequests
@@ -118,7 +118,7 @@ module Logic =
         availableVacation
 
     // Calcul congés prévu
-    let getAlreadyTakenVacation (user: UserId) (allrequests: Vacations) (currentDate: DateTime) =
+    let getAlreadyTakenVacation (user: UserId) (allrequests: seq<TimeOffRequest>) (currentDate: DateTime) =
         let mutable availableVacation = 0.
         let userRequests =
             allrequests
@@ -129,7 +129,7 @@ module Logic =
         availableVacation            
 
     // Calcul Solde disponible
-    let getAvailableVacation (user: UserId) (allrequests: Vacations) (currentDate: DateTime) =
+    let getAvailableVacation (user: UserId) (allrequests: seq<TimeOffRequest>) (currentDate: DateTime) =
         let theoricallAvailableVacation = getTheoricallAvailableVacation currentDate
         let pastYearVacation = getPastYearVacation user allrequests currentDate
         let effectifVaction = getEffectifVacation user allrequests currentDate
@@ -172,6 +172,7 @@ module Logic =
     let validateRequest requestState =
         match requestState with
         | PendingValidation request ->
+            // add request validated to cache          
             Ok [RequestValidated request]
         | _ ->
             Error "Request cannot be validated"
@@ -197,7 +198,7 @@ module Logic =
         | _ ->
             Error "Request cannot be canceled"
 
-    let decide (getCurrentTime : unit->DateTime) (userRequests: UserRequestsState) (user: User) (command: Command) =
+    let decide (getCurrentTime : unit->DateTime) (userRequests: UserRequestsState) (user: User) (command: Command)=
         let relatedUserId = command.UserId
         match user with
         | Employee userId when userId <> relatedUserId ->
@@ -218,8 +219,9 @@ module Logic =
                 if user <> Manager then
                     Error "Unauthorized"
                 else
-                    let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
+                    let requestState = defaultArg (userRequests.TryFind requestId) NotCreated                    
                     validateRequest requestState
+                    
                     
             | CancelRequest (_, requestId) ->
                 let requestState = defaultArg (userRequests.TryFind requestId) NotCreated

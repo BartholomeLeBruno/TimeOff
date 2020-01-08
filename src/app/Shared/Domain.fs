@@ -23,7 +23,5 @@ type TimeOffRequest = {
     RequestId: Guid
     Start: Boundary
     End: Boundary
+    TakenDate: DateTime
 }
-
-[<CLIMutable>]
-type Vacations = seq<TimeOffRequest>
