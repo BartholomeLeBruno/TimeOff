@@ -170,7 +170,6 @@ module Logic =
     let validateRequest requestState =
         match requestState with
         | PendingValidation request ->
-            // add request validated to cache          
             Ok [RequestValidated request]
         | _ ->
             Error "Request cannot be validated"
