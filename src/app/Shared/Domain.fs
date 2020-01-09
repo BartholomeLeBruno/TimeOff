@@ -23,7 +23,5 @@ type TimeOffRequest = {
     RequestId: Guid
     Start: Boundary
     End: Boundary
+    TakenDate: DateTime
 }
-
-[<CLIMutable>]
-type Vacations = Map<UserId, List<TimeOffRequest>>

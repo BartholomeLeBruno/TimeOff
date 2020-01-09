@@ -66,8 +66,6 @@ module Logic =
             | Canceled _ -> false
 
     type UserRequestsState = Map<Guid, RequestState>
-    let getCurrentDay () =
-        DateTime.Today
 
     let evolveRequest state event =
         match event with
@@ -77,52 +75,64 @@ module Logic =
         | RequestCancelPendingCanceled request -> Canceled request
         | RequestCancelPendingValidated request -> Validated request
 
-    let getBetweenDate (firstDate: DateTime) (secondDate: DateTime) =
-        let mutable theDate = 0
-        let mutable testableDate = firstDate
-        while firstDate.Date <> secondDate.Date do
-            testableDate <- firstDate.AddDays(1.)
-            if firstDate.DayOfWeek <> DayOfWeek.Sunday || firstDate.DayOfWeek <> DayOfWeek.Saturday then
-                theDate <- theDate + 1;
+    let getBetweenDate (requestDate: TimeOffRequest) =
+        let mutable theDate = 0.
+        let mutable testableDate = requestDate.Start.Date
+        if requestDate.Start.HalfDay = requestDate.End.HalfDay then 
+            theDate <- theDate - 0.5
+        while testableDate <= requestDate.End.Date do
+            testableDate <- testableDate.AddDays(1.)
+            if requestDate.Start.Date.DayOfWeek <> DayOfWeek.Sunday || requestDate.Start.Date.DayOfWeek <> DayOfWeek.Saturday then
+                theDate <- theDate + 1.;
         theDate
 
     // Calcul du cumul des congés
-    let getAvailableVacation (user: UserId) =
+    let getTheoricallAvailableVacation (currentDate: DateTime) =
         let mutable availableVacation = 0.
-        if (getCurrentDay().Month > 1) then
-            availableVacation <-  2.5 * (float)(getCurrentDay().Month - 1)
+        if (currentDate.Month > 1) then
+            availableVacation <-  2.5 * (float)(currentDate.Month - 1)
         availableVacation
 
     // Calcul des congés pris l'année précèdente
-    let getPastYearVacation (user: UserId) (allrequests: Vacations) =
-        let mutable availableVacation = 2.5 * 12.
+    let getPastYearVacation (user: UserId) (allrequests: seq<TimeOffRequest>) (currentDate: DateTime) =
+        let mutable availableVacation = 2.5 * 11.
         let userRequests =
             allrequests
-            |> Map.tryFind user
-        for request in userRequests.Value do
-            if((request.Start.Date.Year - 1) = (getCurrentDay().Year - 1)) then
-                availableVacation <- availableVacation - (float)(getBetweenDate request.Start.Date request.End.Date) 
+            |> Seq.where(fun request -> request.UserId = user)
+            |> Seq.where(fun request -> request.Start.Date.Year = (currentDate.Year - 1))
+        for request in userRequests do
+                availableVacation <- availableVacation - (float)(getBetweenDate request) 
+        availableVacation            
 
     // Calcul congé effectif
-    let getEffectifVacation (user: UserId) (allrequests: Vacations) = 
-        let mutable availableVacation = 2.5 * (float)(getCurrentDay().Month)
-        let userRequests =
-            allrequests
-            |> Map.tryFind user
-        for request in userRequests.Value do
-            if(request.Start.Date.Year = getCurrentDay().Year) then
-                availableVacation <- availableVacation - (float)(getBetweenDate request.Start.Date request.End.Date) 
-        availableVacation
-
-    // Calcul congés prévu
-    let getAlreadyTakenVacation (user: UserId) (allrequests: Vacations) =
+    let getEffectifVacation (user: UserId) (allrequests: seq<TimeOffRequest>) (currentDate: DateTime) = 
         let mutable availableVacation = 0.
         let userRequests =
             allrequests
-            |> Map.tryFind user
-        for request in userRequests.Value do
-            if request.Start.Date.Year = getCurrentDay().Year && request.Start.Date.Day > getCurrentDay().Day then
-                availableVacation <- availableVacation + (float)(getBetweenDate request.Start.Date request.End.Date) 
+            |> Seq.where(fun request -> request.UserId = user)
+            |> Seq.where(fun request -> request.Start.Date.Year = currentDate.Year)
+        for request in userRequests do
+                availableVacation <- availableVacation + (float)(getBetweenDate request) 
+        availableVacation
+
+    // Calcul congés prévu
+    let getAlreadyTakenVacation (user: UserId) (allrequests: seq<TimeOffRequest>) (currentDate: DateTime) =
+        let mutable availableVacation = 0.
+        let userRequests =
+            allrequests
+            |> Seq.where(fun request -> request.UserId = user)
+            |> Seq.where(fun request -> request.Start.Date.Year = currentDate.Year && request.Start.Date.Day > currentDate.Day)
+        for request in userRequests do
+                availableVacation <- availableVacation + (float)(getBetweenDate request)
+        availableVacation            
+
+    // Calcul Solde disponible
+    let getAvailableVacation (user: UserId) (allrequests: seq<TimeOffRequest>) (currentDate: DateTime) =
+        let theoricallAvailableVacation = getTheoricallAvailableVacation currentDate
+        let pastYearVacation = getPastYearVacation user allrequests currentDate
+        let effectifVaction = getEffectifVacation user allrequests currentDate
+        let alreadyTakenVaction = getAlreadyTakenVacation user allrequests currentDate
+        (theoricallAvailableVacation + (float) pastYearVacation) - (effectifVaction + alreadyTakenVaction)     
 
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =
         let requestState = defaultArg (Map.tryFind event.Request.RequestId userRequests) NotCreated
@@ -185,7 +195,7 @@ module Logic =
         | _ ->
             Error "Request cannot be canceled"
 
-    let decide (getCurrentTime : unit->DateTime) (userRequests: UserRequestsState) (user: User) (command: Command) =
+    let decide (getCurrentTime : unit->DateTime) (userRequests: UserRequestsState) (user: User) (command: Command)=
         let relatedUserId = command.UserId
         match user with
         | Employee userId when userId <> relatedUserId ->
@@ -206,8 +216,9 @@ module Logic =
                 if user <> Manager then
                     Error "Unauthorized"
                 else
-                    let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
+                    let requestState = defaultArg (userRequests.TryFind requestId) NotCreated                    
                     validateRequest requestState
+                    
                     
             | CancelRequest (_, requestId) ->
                 let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
